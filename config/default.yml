@@ -1,0 +1,24 @@
+
+http:
+  port: 3000
+  host: 0.0.0.0
+
+
+github:
+  path: /webhook
+  ##
+  # The secret for development purpose, not used in production environment.
+  #
+  secret: NHxU6yHkKrBXizER
+
+
+repositories:
+  tictactoe-app-bundles:
+    script: assets/test1
+  archives.t2t.io:
+    script: assets/test2
+
+
+logger:
+  name: github-hook
+  verbose: true

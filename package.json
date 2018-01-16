@@ -1,0 +1,46 @@
+{
+  "name": "tic-github-hook-server",
+  "author": {
+    "name": "yagamy",
+    "email": "yagamy@t2t.io"
+  },
+  "description": "Simple Github Hook Server",
+  "version": "0.5.1",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": "4.4.x"
+  },
+  "ava": {
+    "files": [
+      "tests/*.js",
+      "test/*.js"
+    ]
+  },
+  "scripts": {},
+  "dependencies": {
+    "colors": "*",
+    "byline": "*",
+    "yargs": "*",
+    "mkdirp": "*",
+    "async": "*",
+    "prettyjson": "*",
+    "js-yaml": "*",
+    "github-webhook-handler": "*",
+    "bunyan": "*",
+    "bunyan-rotating-file-stream": "*",
+    "bunyan-debug-stream": "*",
+    "moment-timezone": "*"
+  },
+  "devDependencies": {
+    "ava": "^0.24.0"
+  },
+  "keywords": [
+    "tic",
+    "github",
+    "hook"
+  ],
+  "license": "MIT"
+}
