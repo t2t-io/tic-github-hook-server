@@ -1,3 +1,43 @@
 #!/bin/bash
-echo "all args => $@"
-echo "message" >&2
+
+function github_push_tag {
+	local REPOSITORY=$1; shift
+	local CURRENT=$(pwd)
+	case "${REPOSITORY}" in
+		tictactoe-app-bundles)
+			local APP_CATEGORY=$1
+			local APP_NAME=$2
+			local APP_VERSION=$3
+			local REPO_DIR="/Users/yagamy/Works/workspaces/t2t/${REPOSITORY}"
+			cd ${REPO_DIR}
+			git pull
+			local COMMAND=""
+			COMMAND="echo ${DOCKER_PSWD} | docker login --username ${DOCKER_USERNAME} --password-stdin"; echo "${COMMAND}"; $BASH -c "${COMMAND}"
+			COMMAND="git pull"; echo "${COMMAND}"; $BASH -c "${COMMAND}"
+			COMMAND="${REPO_DIR}/${APP_CATEGORY}/${APP_NAME}/publish-docker-image ${APP_VERSION}"; echo ${COMMAND}; $BASH -c "${COMMAND}"
+			;;
+		*)
+			echo "unsupported repository: ${REPOSITORY}"
+			exit 21
+	esac
+}
+
+function wrapper {
+	local REPOSITORY=$1; shift
+	local REPOSITORY_EVENT=$1; shift
+	local REFERENCE_TYPE=$1; shift
+	local PAYLOAD=$1; shift
+
+	[ "" == "${REPOSITORY}" ] && echo "please specify repository as 1st argument" && exit 1
+	[ "" == "${REPOSITORY_EVENT}" ] && echo "please specify repository event as 2nd argument" && exit 2
+	[ "" == "${REFERENCE_TYPE}" ] && echo "please specify reference-type as 3rd argument" && exit 3
+	[ "" == "${PAYLOAD}" ] && echo "please specify payload json file as 4th argument" && exit 4
+	
+	[ "push" != "${REPOSITORY_EVENT}" ] && echo "only support push event" && exit 11
+	[ "tags" != "${REFERENCE_TYPE}" ] && echo "only support tags reference-type" && exit 12
+	[ ! -f "${PAYLOAD}" ] && echo "missing payload file ${PAYLOAD}" && exit 13
+
+	github_push_tag ${REPOSITORY} $@
+}
+
+wrapper $@

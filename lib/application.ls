@@ -29,22 +29,30 @@ class RepositoryHook
     return ERR write-err if write-err?
     xs = ref.split '/'
     return unless xs.length >= 2
-    tokens = xs[2].split '-'
-    category = tokens.shift!
-    version = tokens.pop!
-    app = tokens.join '-'
-    INFO "#{prefix}: push #{xs[1]}/#{xs[2].gray} => #{category}/#{app} with version #{version}"
-    prefix = "#{prefix}[#{category.gray}:#{app.green}:#{version.magenta}]"
+    [x, reference-type, reference] = xs
+    if reference-type is \heads and reference is \master
+      category = \_
+      app = \_
+      version = \master
+    else if reference-type is \tags
+      tokens = reference.split '-'
+      category = tokens.shift!
+      version = tokens.pop!
+      app = tokens.join '-'
+    else
+      return WARN "#{prefix}: cannot handle this ref: #{ref}"
+    INFO "#{prefix}: push #{reference-type}/#{reference.gray} => #{category}/#{app} with version #{version}"
+    pp = "#{prefix}[#{category.gray}:#{app.green}:#{version.magenta}]"
     cwd = process.cwd!
-    args = [name, "push", xs[1], category, app, version, fullpath]
-    opts = cwd: cwd, env: {}, stdio: <[pipe pipe]>
+    args = [name, "push", reference-type, fullpath, category, app, version]
+    opts = cwd: cwd, env: process.env, stdio: <[pipe pipe]>
     p = spawn script, args, opts
-    p.on \error, (err) -> return ERR "#{prefix}: push #{xs[1]}/#{xs[2].gray}, failed: #{err}"
-    p.on \exit, (exit) -> return INFO "#{prefix}: #{script.yellow} #{(args.join ' ').gray} => exit: #{exit}"
+    p.on \error, (err) -> return ERR "#{pp}: push #{xs[1]}/#{xs[2].gray}, failed: #{err}"
+    p.on \exit, (exit) -> return INFO "#{pp}: #{script.yellow} #{(args.join ' ').gray} => exit: #{exit}"
     stdout-reader = byline p.stdout
     stderr-reader = byline p.stderr
-    stdout-reader.on \data, (line) -> INFO "#{prefix}: #{'out'.gray}: #{line}"
-    stderr-reader.on \data, (line) -> INFO "#{prefix}: #{'err'.red}: #{line.to-string!.red}"
+    stdout-reader.on \data, (line) -> INFO "#{pp}: #{'out'.gray}: #{line}"
+    stderr-reader.on \data, (line) -> INFO "#{pp}: #{'err'.red}: #{line.to-string!.red}"
 
 
 
@@ -74,9 +82,9 @@ class Application
     server.listen port, host
 
   at-http: (req, res) ->
-    (req, res) <- @handler req, res
+    (err) <- @handler req, res
     res.statusCode = 404
-    res.end 'no such location'
+    res.end "no such location, err: #{err}"
 
   at-err: (error) ->
     ERR error
