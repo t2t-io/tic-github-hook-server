@@ -86,7 +86,7 @@ class Application
     res.statusCode = 404
     res.end "no such location, err: #{err}"
 
-  at-err: (error) ->
+  at-error: (error) ->
     ERR error
 
   at-github-push: (evt) ->
